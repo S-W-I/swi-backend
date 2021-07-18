@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"log"
 	"runtime/debug"
+
+	fasthttp "github.com/valyala/fasthttp"
 )
 
 func handleError(err error) {
@@ -15,6 +17,21 @@ func handleError(err error) {
 		log.Fatal(err)
 	}
 }
+type MyHandler struct {
+	foobar string
+}
+
+// request handler in net/http style, i.e. method bound to MyHandler struct.
+func (h *MyHandler) HandleFastHTTP(ctx *fasthttp.RequestCtx) {
+	// notice that we may access MyHandler properties here - see h.foobar.
+	fmt.Fprintf(ctx, "Hello, world! Requested path is %q. Foobar is %q",
+		ctx.Path(), h.foobar)
+}
+
+// // request handler in fasthttp style, i.e. just plain function.
+// func fastHTTPHandler(ctx *fasthttp.RequestCtx) {
+// 	fmt.Fprintf(ctx, "Hi there! RequestURI is %q", ctx.RequestURI())
+// }
 
 
 func main() {
@@ -24,10 +41,29 @@ func main() {
 	resp, err := json.Marshal(&fstree)
 	handleError(err)
 
-	err = ioutil.WriteFile("tree.json", resp, 0x777)
-	handleError(err)
+	// err = ioutil.WriteFile("tree.json", resp, 0x777)
+	// handleError(err)
 
 	fmt.Printf("fstree: %+v \n", fstree)
+
+
+	// request handler in fasthttp style, i.e. just plain function.
+	fastHTTPHandler := func (ctx *fasthttp.RequestCtx) {
+		ctx.Response.Header.Add("Content-Type", "application/json")
+		ctx.Response.Header.Add("Access-Control-Allow-Origin", "*")
+		fmt.Fprint(ctx, string(resp))
+		// fmt.Fprintf(ctx, "Hi there! RequestURI is %q", ctx.RequestURI())
+		// fmt.Fprintf(ctx, "Hi there! RequestURI is %q", ctx.RequestURI())
+	}
+
+	// pass bound struct method to fasthttp
+	// myHandler := &MyHandler{
+	// 	foobar: "foobar",
+	// }
+	// fasthttp.ListenAndServe(":8080", myHandler.HandleFastHTTP)
+
+	// pass plain function to fasthttp
+	fasthttp.ListenAndServe(":8081", fastHTTPHandler)
 }
 
 type FileSystemNode struct {

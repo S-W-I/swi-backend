@@ -12,7 +12,7 @@ func Serve() {
 	_ = hash
 
 	m := &http.ServeMux{}
-	m.HandleFunc("/k", )
+	// m.HandleFunc("/k", )
 
 	http.ListenAndServe(":80", m)
 }

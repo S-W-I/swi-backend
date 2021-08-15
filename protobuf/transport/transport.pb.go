@@ -9,7 +9,6 @@ package transport
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	anypb "google.golang.org/protobuf/types/known/anypb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -20,61 +19,6 @@ const (
 	// Verify that runtime/protoimpl is sufficiently up-to-date.
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
-
-type Response struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Message string       `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
-	Result  []*anypb.Any `protobuf:"bytes,2,rep,name=result,proto3" json:"result,omitempty"`
-}
-
-func (x *Response) Reset() {
-	*x = Response{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_transport_proto_msgTypes[0]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *Response) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Response) ProtoMessage() {}
-
-func (x *Response) ProtoReflect() protoreflect.Message {
-	mi := &file_transport_proto_msgTypes[0]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Response.ProtoReflect.Descriptor instead.
-func (*Response) Descriptor() ([]byte, []int) {
-	return file_transport_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *Response) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
-func (x *Response) GetResult() []*anypb.Any {
-	if x != nil {
-		return x.Result
-	}
-	return nil
-}
 
 type DropResponseMessage struct {
 	state         protoimpl.MessageState
@@ -87,7 +31,7 @@ type DropResponseMessage struct {
 func (x *DropResponseMessage) Reset() {
 	*x = DropResponseMessage{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_transport_proto_msgTypes[1]
+		mi := &file_transport_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -100,7 +44,7 @@ func (x *DropResponseMessage) String() string {
 func (*DropResponseMessage) ProtoMessage() {}
 
 func (x *DropResponseMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_transport_proto_msgTypes[1]
+	mi := &file_transport_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -113,7 +57,7 @@ func (x *DropResponseMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DropResponseMessage.ProtoReflect.Descriptor instead.
 func (*DropResponseMessage) Descriptor() ([]byte, []int) {
-	return file_transport_proto_rawDescGZIP(), []int{1}
+	return file_transport_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *DropResponseMessage) GetMessage() string {
@@ -123,23 +67,232 @@ func (x *DropResponseMessage) GetMessage() string {
 	return ""
 }
 
+type RequestSessionBody struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	SessionId string `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+}
+
+func (x *RequestSessionBody) Reset() {
+	*x = RequestSessionBody{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_transport_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RequestSessionBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RequestSessionBody) ProtoMessage() {}
+
+func (x *RequestSessionBody) ProtoReflect() protoreflect.Message {
+	mi := &file_transport_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RequestSessionBody.ProtoReflect.Descriptor instead.
+func (*RequestSessionBody) Descriptor() ([]byte, []int) {
+	return file_transport_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *RequestSessionBody) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+type UpdateSessionBody struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	SessionId string            `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Tree      map[string]string `protobuf:"bytes,2,rep,name=tree,proto3" json:"tree,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+}
+
+func (x *UpdateSessionBody) Reset() {
+	*x = UpdateSessionBody{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_transport_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateSessionBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateSessionBody) ProtoMessage() {}
+
+func (x *UpdateSessionBody) ProtoReflect() protoreflect.Message {
+	mi := &file_transport_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateSessionBody.ProtoReflect.Descriptor instead.
+func (*UpdateSessionBody) Descriptor() ([]byte, []int) {
+	return file_transport_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *UpdateSessionBody) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *UpdateSessionBody) GetTree() map[string]string {
+	if x != nil {
+		return x.Tree
+	}
+	return nil
+}
+
+type CompileSessionBody struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	SessionId string `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+}
+
+func (x *CompileSessionBody) Reset() {
+	*x = CompileSessionBody{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_transport_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CompileSessionBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CompileSessionBody) ProtoMessage() {}
+
+func (x *CompileSessionBody) ProtoReflect() protoreflect.Message {
+	mi := &file_transport_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CompileSessionBody.ProtoReflect.Descriptor instead.
+func (*CompileSessionBody) Descriptor() ([]byte, []int) {
+	return file_transport_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *CompileSessionBody) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+type DownloadCompiledSessionBody struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	SessionId string `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+}
+
+func (x *DownloadCompiledSessionBody) Reset() {
+	*x = DownloadCompiledSessionBody{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_transport_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DownloadCompiledSessionBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DownloadCompiledSessionBody) ProtoMessage() {}
+
+func (x *DownloadCompiledSessionBody) ProtoReflect() protoreflect.Message {
+	mi := &file_transport_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DownloadCompiledSessionBody.ProtoReflect.Descriptor instead.
+func (*DownloadCompiledSessionBody) Descriptor() ([]byte, []int) {
+	return file_transport_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *DownloadCompiledSessionBody) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
 var File_transport_proto protoreflect.FileDescriptor
 
 var file_transport_proto_rawDesc = []byte{
 	0x0a, 0x0f, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x70, 0x6f, 0x72, 0x74, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x1a, 0x19, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
-	0x75, 0x66, 0x2f, 0x61, 0x6e, 0x79, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x52, 0x0a, 0x08,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73,
+	0x6f, 0x22, 0x2f, 0x0a, 0x13, 0x44, 0x72, 0x6f, 0x70, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73,
 	0x61, 0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61,
-	0x67, 0x65, 0x12, 0x2c, 0x0a, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x18, 0x02, 0x20, 0x03,
-	0x28, 0x0b, 0x32, 0x14, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x62, 0x75, 0x66, 0x2e, 0x41, 0x6e, 0x79, 0x52, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74,
-	0x22, 0x2f, 0x0a, 0x13, 0x44, 0x72, 0x6f, 0x70, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61,
-	0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67,
-	0x65, 0x42, 0x18, 0x5a, 0x16, 0x73, 0x77, 0x69, 0x2d, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75,
-	0x66, 0x2f, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x70, 0x6f, 0x72, 0x74, 0x62, 0x06, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x33,
+	0x67, 0x65, 0x22, 0x33, 0x0a, 0x12, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x53, 0x65, 0x73,
+	0x73, 0x69, 0x6f, 0x6e, 0x42, 0x6f, 0x64, 0x79, 0x12, 0x1d, 0x0a, 0x0a, 0x73, 0x65, 0x73, 0x73,
+	0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x73, 0x65,
+	0x73, 0x73, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x22, 0x9d, 0x01, 0x0a, 0x11, 0x55, 0x70, 0x64, 0x61,
+	0x74, 0x65, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x42, 0x6f, 0x64, 0x79, 0x12, 0x1d, 0x0a,
+	0x0a, 0x73, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x09, 0x73, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x30, 0x0a, 0x04,
+	0x74, 0x72, 0x65, 0x65, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x55, 0x70, 0x64,
+	0x61, 0x74, 0x65, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x42, 0x6f, 0x64, 0x79, 0x2e, 0x54,
+	0x72, 0x65, 0x65, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x04, 0x74, 0x72, 0x65, 0x65, 0x1a, 0x37,
+	0x0a, 0x09, 0x54, 0x72, 0x65, 0x65, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b,
+	0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a,
+	0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x76, 0x61,
+	0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x22, 0x33, 0x0a, 0x12, 0x43, 0x6f, 0x6d, 0x70, 0x69,
+	0x6c, 0x65, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x42, 0x6f, 0x64, 0x79, 0x12, 0x1d, 0x0a,
+	0x0a, 0x73, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x09, 0x73, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x22, 0x3c, 0x0a, 0x1b,
+	0x44, 0x6f, 0x77, 0x6e, 0x6c, 0x6f, 0x61, 0x64, 0x43, 0x6f, 0x6d, 0x70, 0x69, 0x6c, 0x65, 0x64,
+	0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x42, 0x6f, 0x64, 0x79, 0x12, 0x1d, 0x0a, 0x0a, 0x73,
+	0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x09, 0x73, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x42, 0x18, 0x5a, 0x16, 0x73, 0x77,
+	0x69, 0x2d, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x74, 0x72, 0x61, 0x6e, 0x73,
+	0x70, 0x6f, 0x72, 0x74, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -154,14 +307,17 @@ func file_transport_proto_rawDescGZIP() []byte {
 	return file_transport_proto_rawDescData
 }
 
-var file_transport_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_transport_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_transport_proto_goTypes = []interface{}{
-	(*Response)(nil),            // 0: Response
-	(*DropResponseMessage)(nil), // 1: DropResponseMessage
-	(*anypb.Any)(nil),           // 2: google.protobuf.Any
+	(*DropResponseMessage)(nil),         // 0: DropResponseMessage
+	(*RequestSessionBody)(nil),          // 1: RequestSessionBody
+	(*UpdateSessionBody)(nil),           // 2: UpdateSessionBody
+	(*CompileSessionBody)(nil),          // 3: CompileSessionBody
+	(*DownloadCompiledSessionBody)(nil), // 4: DownloadCompiledSessionBody
+	nil,                                 // 5: UpdateSessionBody.TreeEntry
 }
 var file_transport_proto_depIdxs = []int32{
-	2, // 0: Response.result:type_name -> google.protobuf.Any
+	5, // 0: UpdateSessionBody.tree:type_name -> UpdateSessionBody.TreeEntry
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -176,7 +332,7 @@ func file_transport_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_transport_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Response); i {
+			switch v := v.(*DropResponseMessage); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -188,7 +344,43 @@ func file_transport_proto_init() {
 			}
 		}
 		file_transport_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DropResponseMessage); i {
+			switch v := v.(*RequestSessionBody); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_transport_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UpdateSessionBody); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_transport_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CompileSessionBody); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_transport_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DownloadCompiledSessionBody); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -206,7 +398,7 @@ func file_transport_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_transport_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

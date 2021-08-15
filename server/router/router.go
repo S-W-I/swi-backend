@@ -2,8 +2,9 @@ package router
 
 import (
 	"encoding/json"
-	"swi/server/apperror"
+	"swi/protobuf/transport"
 	"swi/server/cache"
+	"swi/server/errors"
 	"swi/server/session"
 
 	fasthttp "github.com/valyala/fasthttp"
@@ -20,7 +21,10 @@ type Router struct {
 
 func (r *Router) bindHeaders(ctx *fasthttp.RequestCtx) {
 	ctx.Response.Header.Add("Content-Type", "application/json")
-	ctx.Response.Header.Add("Access-Control-Allow-Origin", "*")
+	ctx.Response.Header.Set("Access-Control-Allow-Origin", "*")
+	ctx.Response.Header.Set("Access-Control-Allow-Credentials", "true")
+	ctx.Response.Header.Set("Access-Control-Allow-Methods", "*")
+	ctx.Response.Header.Set("Access-Control-Allow-Headers", "Keep-Alive,User-Agent,Cache-Control,Content-Type,Authorization")
 }
 
 func handleError(ctx *fasthttp.Response, err error) {
@@ -37,22 +41,27 @@ func handleError(ctx *fasthttp.Response, err error) {
 func (r *Router) Route(ctx *fasthttp.RequestCtx) {
 	r.bindHeaders(ctx)
 
-	var err error
-	_ = err
+	if string(ctx.Request.Header.Method()) == "OPTIONS" {
+		ctx.Response.SetStatusCode(fasthttp.StatusOK)
+		// ctx.Response.Header.Del("Content-Type")
+		return
+	}
+	// var err error
+	// _ = err
 	switch string(ctx.Path()) {
 	case "/session/code/download":
 		if string(ctx.Request.Header.Method()) != "POST" {
-			handleError(&ctx.Response, apperror.UnsupportedMethodError)
+			handleError(&ctx.Response, errors.UnsupportedMethodError)
 			return
 		}
-		var sessionRetrieveBody UpdateSessionBody
+		var sessionRetrieveBody transport.RequestSessionBody
 		err := json.Unmarshal(ctx.Request.Body(), &sessionRetrieveBody)
 		if err != nil {
 			handleError(&ctx.Response, err)
 			return
 		}
 
-		binaryBytes, err := r.sessionManager.DownloadSolanaCompiledProject(sessionRetrieveBody.SessionID)
+		binaryBytes, err := r.sessionManager.DownloadSolanaCompiledProject(sessionRetrieveBody.SessionId)
 		if err != nil {
 			handleError(&ctx.Response, err)
 			return
@@ -64,17 +73,17 @@ func (r *Router) Route(ctx *fasthttp.RequestCtx) {
 		ctx.Response.SetStatusCode(fasthttp.StatusOK)
 	case "/session/code/compile":
 		if string(ctx.Request.Header.Method()) != "POST" {
-			handleError(&ctx.Response, apperror.UnsupportedMethodError)
+			handleError(&ctx.Response, errors.UnsupportedMethodError)
 			return
 		}
-		var sessionRetrieveBody UpdateSessionBody
+		var sessionRetrieveBody transport.RequestSessionBody
 		err := json.Unmarshal(ctx.Request.Body(), &sessionRetrieveBody)
 		if err != nil {
 			handleError(&ctx.Response, err)
 			return
 		}
 
-		session, err := r.sessionManager.CompileSolanaProject(sessionRetrieveBody.SessionID)
+		session, err := r.sessionManager.CompileSolanaProject(sessionRetrieveBody.SessionId)
 		if err != nil {
 			handleError(&ctx.Response, err)
 			return
@@ -84,17 +93,17 @@ func (r *Router) Route(ctx *fasthttp.RequestCtx) {
 		ctx.Response.SetStatusCode(fasthttp.StatusOK)
 	case "/session/code/update":
 		if string(ctx.Request.Header.Method()) != "POST" {
-			handleError(&ctx.Response, apperror.UnsupportedMethodError)
+			handleError(&ctx.Response, errors.UnsupportedMethodError)
 			return
 		}
-		var sessionRetrieveBody UpdateSessionBody
+		var sessionRetrieveBody transport.UpdateSessionBody
 		err := json.Unmarshal(ctx.Request.Body(), &sessionRetrieveBody)
 		if err != nil {
 			handleError(&ctx.Response, err)
 			return
 		}
 
-		session, err := r.sessionManager.UpdateSessionData(sessionRetrieveBody.SessionID, sessionRetrieveBody.Tree)
+		session, err := r.sessionManager.UpdateSessionData(sessionRetrieveBody.SessionId, sessionRetrieveBody.Tree)
 		if err != nil {
 			handleError(&ctx.Response, err)
 			return
@@ -104,17 +113,37 @@ func (r *Router) Route(ctx *fasthttp.RequestCtx) {
 		ctx.Response.SetStatusCode(fasthttp.StatusOK)
 	case "/session/code/tree":
 		if string(ctx.Request.Header.Method()) != "POST" {
-			handleError(&ctx.Response, apperror.UnsupportedMethodError)
+			handleError(&ctx.Response, errors.UnsupportedMethodError)
 			return
 		}
-		var sessionRetrieveBody RequestSessionBody
+		var sessionRetrieveBody transport.RequestSessionBody
 		err := json.Unmarshal(ctx.Request.Body(), &sessionRetrieveBody)
 		if err != nil {
 			handleError(&ctx.Response, err)
 			return
 		}
 
-		session, err := r.sessionManager.BuildSessionTreeFor(sessionRetrieveBody.SessionID)
+		session, err := r.sessionManager.BuildSessionTreeFor(sessionRetrieveBody.SessionId)
+		if err != nil {
+			handleError(&ctx.Response, err)
+			return
+		}
+
+		ctx.Response.SetBody(SuccessfulResponseFrom(session).Bytes())
+		ctx.Response.SetStatusCode(fasthttp.StatusOK)
+	case "/session/code/legacy/tree":
+		if string(ctx.Request.Header.Method()) != "POST" {
+			handleError(&ctx.Response, errors.UnsupportedMethodError)
+			return
+		}
+		var sessionRetrieveBody transport.RequestSessionBody
+		err := json.Unmarshal(ctx.Request.Body(), &sessionRetrieveBody)
+		if err != nil {
+			handleError(&ctx.Response, err)
+			return
+		}
+
+		session, err := r.sessionManager.BuildSessionLegacyTreeFor(sessionRetrieveBody.SessionId)
 		if err != nil {
 			handleError(&ctx.Response, err)
 			return
@@ -124,17 +153,17 @@ func (r *Router) Route(ctx *fasthttp.RequestCtx) {
 		ctx.Response.SetStatusCode(fasthttp.StatusOK)
 	case "/session/info":
 		if string(ctx.Request.Header.Method()) != "POST" {
-			handleError(&ctx.Response, apperror.UnsupportedMethodError)
+			handleError(&ctx.Response, errors.UnsupportedMethodError)
 			return
 		}
-		var sessionRetrieveBody RequestSessionBody
+		var sessionRetrieveBody transport.RequestSessionBody
 		err := json.Unmarshal(ctx.Request.Body(), &sessionRetrieveBody)
 		if err != nil {
 			handleError(&ctx.Response, err)
 			return
 		}
 
-		session, err := r.sessionManager.RetrieveSession(sessionRetrieveBody.SessionID)
+		session, err := r.sessionManager.RetrieveSession(sessionRetrieveBody.SessionId)
 		if err != nil {
 			handleError(&ctx.Response, err)
 			return
@@ -144,7 +173,7 @@ func (r *Router) Route(ctx *fasthttp.RequestCtx) {
 		ctx.Response.SetStatusCode(fasthttp.StatusOK)
 	case "/session/new":
 		if string(ctx.Request.Header.Method()) != "POST" {
-			handleError(&ctx.Response, apperror.UnsupportedMethodError)
+			handleError(&ctx.Response, errors.UnsupportedMethodError)
 			return
 		}
 		newSession, err := r.sessionManager.NewSession()
@@ -155,8 +184,8 @@ func (r *Router) Route(ctx *fasthttp.RequestCtx) {
 
 		ctx.Response.SetBody(SuccessfulResponseFrom(newSession).Bytes())
 		ctx.Response.SetStatusCode(fasthttp.StatusOK)
-	default:
-		ctx.Error("Unsupported path", fasthttp.StatusNotFound)
+	// default:
+	// 	ctx.Error("Unsupported path", fasthttp.StatusNotFound)
 	}
 	
 	// fmt.Fprint(ctx, string(resp))

@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// CompilationResult
 
 type SessionID string
 func (session SessionID) Encoded() string {
@@ -20,20 +19,6 @@ func (session SessionID) Decoded() string {
 func NewSessionID() SessionID {
 	return SessionID(uuid.NewString())
 }
-
-
-type SessionTree struct {
-	// FilePaths map[string][]byte
-	FilePaths map[string]string `json:"file_paths"`
-}
-
 type SessionManagerMeta struct {
 	WorkdirPath, TemplatePath string
-}
-
-
-type CompilationResult struct {
-	Version      string `json:"version"`
-	CompileError bool `json:"compile_error"`
-	Message      string `json:"message"`
 }

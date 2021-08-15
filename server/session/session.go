@@ -10,6 +10,8 @@ import (
 	"os/exec"
 	"strings"
 	sessionproto "swi/protobuf/session"
+
+	// sessionproto "swi/protobuf/session"
 	"swi/server/db"
 	"time"
 )
@@ -64,7 +66,7 @@ func (manager *SessionManager) DownloadSolanaCompiledProject(sessionId string) (
 	return compiledFileData, nil
 }
 
-func (manager *SessionManager) CompileSolanaProject(sessionId string) (*CompilationResult, error) {
+func (manager *SessionManager) CompileSolanaProject(sessionId string) (*sessionproto.CompilationInfo, error) {
 	if !manager.SessionExists(sessionId) {
 		return nil, fmt.Errorf("no such session")
 	}
@@ -74,7 +76,7 @@ func (manager *SessionManager) CompileSolanaProject(sessionId string) (*Compilat
 
 	cmd := exec.Command("cargo", "build-bpf", "--manifest-path", cargoTomlCfgPath)
 
-	result := new(CompilationResult)
+	result := new(sessionproto.CompilationInfo)
 	result.Version = "1.6.9"
 
 	output, err := cmd.Output()
@@ -88,7 +90,7 @@ func (manager *SessionManager) CompileSolanaProject(sessionId string) (*Compilat
 	return result, nil
 }
 
-func (manager *SessionManager) UpdateSessionData(sessionId string, sessionTree map[string]string) (*SessionTree, error) {
+func (manager *SessionManager) UpdateSessionData(sessionId string, sessionTree map[string]string) (*sessionproto.SessionTree, error) {
 	if !manager.SessionExists(sessionId) {
 		return nil, fmt.Errorf("no such session")
 	}
@@ -120,12 +122,56 @@ func (manager *SessionManager) UpdateSessionData(sessionId string, sessionTree m
 	return manager.BuildSessionTreeFor(sessionId)
 }
 
-func (manager *SessionManager) BuildSessionTreeFor(sessionId string) (*SessionTree, error) {
+func (manager *SessionManager) BuildSessionLegacyTreeFor(sessionId string) ([]*sessionproto.SessionLegacyNode, error) {
+	tree, err := manager.BuildSessionTreeFor(sessionId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// building legacy
+	// legacyNode := new(sessionproto.SessionLegacyNode)
+	// legacyNode.Name = sessionId
+	// legacyNode.IsFile = false
+	var result []*sessionproto.SessionLegacyNode
+
+	for _, path := range tree.FilesOrder {
+		legacyNode := new(sessionproto.SessionLegacyNode)
+		buildLegacyNode(legacyNode, path)
+		result = append(result, legacyNode.Children[0].Children...)
+	}
+
+	// return legacyNode.Children, nil
+	
+	return result, nil
+}
+
+func buildLegacyNode(parent *sessionproto.SessionLegacyNode, path string) {
+	if strings.Contains(path, "/") {
+		splittedPath := strings.Split(path, "/")
+		name := splittedPath[0]
+		nextPath := strings.Join(splittedPath[1:], "/")
+
+		childNode := new(sessionproto.SessionLegacyNode)
+		childNode.Name = name
+		childNode.IsFile = false
+		parent.Children = append(parent.Children, childNode)
+
+		buildLegacyNode(childNode, nextPath)
+	} else {
+		childNode := new(sessionproto.SessionLegacyNode)
+		childNode.IsFile = true
+		childNode.Name = path
+		parent.Children = append(parent.Children, childNode)
+	}
+}
+
+func (manager *SessionManager) BuildSessionTreeFor(sessionId string) (*sessionproto.SessionTree, error) {
 	if !manager.SessionExists(sessionId) {
 		return nil, fmt.Errorf("no such session")
 	}
 
-	sessionTree := new(SessionTree)
+	sessionTree := new(sessionproto.SessionTree)
 	sessionTree.FilePaths = make(map[string]string)
 
 	entryPath := manager.workdir + "/" + sessionId
@@ -133,8 +179,8 @@ func (manager *SessionManager) BuildSessionTreeFor(sessionId string) (*SessionTr
 	if err != nil {
 		return nil, err
 	}
-
-	err = persistEntity(entryPath, entryPath, workdirs, sessionTree.FilePaths)
+	
+	err = persistEntity(entryPath, entryPath, workdirs, sessionTree.FilePaths, &sessionTree.FilesOrder)
 
 	return sessionTree, err
 }
@@ -146,7 +192,7 @@ func DecodeContent(content string) ([]byte, error) {
 	return base64.StdEncoding.DecodeString(content)
 }
 
-func persistEntity(rootDir string, currentPath string, files []fs.FileInfo, persistTo map[string]string) error {
+func persistEntity(rootDir string, currentPath string, files []fs.FileInfo, persistTo map[string]string, ordering *[]string) error {
 	for _, file := range files {
 		fileRelativePath := currentPath + "/" + file.Name()
 
@@ -162,9 +208,11 @@ func persistEntity(rootDir string, currentPath string, files []fs.FileInfo, pers
 			}
 
 			noRootPath := strings.Split(fileRelativePath, "/")
-			persistTo[strings.Join(noRootPath[1:], "/")] = EncodeContent(fileContents)
-			// persistTo[strings.Join(noRootPath[1:], "/")] = base64.StdEncoding.EncodeToString(fileContents)
-			// persistTo[fileRelativePath] = base64.StdEncoding.EncodeToString(fileContents)
+			persistKey := strings.Join(noRootPath[1:], "/")
+			persistTo[persistKey] = EncodeContent(fileContents)
+
+			// *ordering = append(*ordering, persistKey)
+			*ordering = append([]string { persistKey }, *ordering...)
 			continue
 		}
 
@@ -174,7 +222,7 @@ func persistEntity(rootDir string, currentPath string, files []fs.FileInfo, pers
 			return err
 		}
 		
-		err = persistEntity(rootDir, nextCurrentPath, innerFiles, persistTo)
+		err = persistEntity(rootDir, nextCurrentPath, innerFiles, persistTo, ordering)
 		if err != nil {
 			return err
 		}

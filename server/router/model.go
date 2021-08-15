@@ -4,6 +4,26 @@ import "encoding/json"
 
 
 
+type RequestSessionBody struct {
+	SessionID string `json:"session_id"`
+}
+
+type UpdateSessionBody struct {
+	SessionID string `json:"session_id"`
+	Tree      map[string]string
+}
+
+type CompileSessionBody struct {
+	SessionID string `json:"session_id"`
+}
+
+type DownloadCompiledSessionBody struct {
+	SessionID string `json:"session_id"`
+}
+
+
+
+
 type Response struct {
 	Status string `json:"status"`
 	Result interface{} `json:"result"`

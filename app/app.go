@@ -11,7 +11,7 @@ import (
 )
 
 type AppConfig struct {
-	SessionWorkDir string
+	SessionWorkDir, TemplatePath string
 	Port int
 }
 
@@ -34,9 +34,18 @@ func Run() {
 				Usage:       "coding sessions workdir",
 				Destination: &inputCfg.SessionWorkDir,
 			},
+			&cli.StringFlag{
+				Name:        "tmp",
+				Value:       "",
+				Usage:       "init code template",
+				Destination: &inputCfg.TemplatePath,
+			},
 		},
 		Action: func(c *cli.Context) error {
-			swiRouter := router.NewRouter()
+			swiRouter, err := router.NewRouter(inputCfg.SessionWorkDir, inputCfg.TemplatePath)
+			if err != nil {
+				return err
+			}
 			fastHTTPHandler := func (ctx *fasthttp.RequestCtx) {
 				swiRouter.Route(ctx)
 			}

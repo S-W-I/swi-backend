@@ -1,8 +1,6 @@
 package cache
 
 
-
-
 type CacheManager struct {}
 
 func (cm *CacheManager) Persist() {}
@@ -23,7 +21,9 @@ func (sm *SessionManager) fetch(path string) *CodeSession  {
 
 
 func (sm *SessionManager) Fetch(inputBody []byte) (*CodeSession, error) {
-	return &CodeSession{}
+	
+	// return &CodeSession{}
+	return nil, nil
 }
 
 func NewCache() *CacheManager {

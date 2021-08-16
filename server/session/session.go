@@ -72,18 +72,31 @@ func (manager *SessionManager) CompileSolanaProject(sessionId string) (*sessionp
 	}
 
 	projectDirectory := manager.workdir + "/" + sessionId
-	cargoTomlCfgPath := projectDirectory + "/Cargo.toml"
+	// cargoTomlCfgPath := projectDirectory + "/Cargo.toml"
+	compileLogPath := projectDirectory + "/output.log"
 
-	cmd := exec.Command("cargo", "build-bpf", "--manifest-path", cargoTomlCfgPath)
+	// cmd := exec.Run("cargo", "build-bpf", "--manifest-path", cargoTomlCfgPath, "&> ./output.log")
+	// cmd := exec.Command("cargo", "build-bpf", "--manifest-path", cargoTomlCfgPath, "&>", "./result.log")
+	cmd := exec.Command("/bin/bash", "wrapped-compile.sh", projectDirectory)
 
 	result := new(sessionproto.CompilationInfo)
 	result.Version = "1.6.9"
 
-	output, err := cmd.Output()
-
-	result.Message = string(output)
-	
+	out, err := cmd.Output()
 	if err != nil {
+		return nil, err
+	}
+	result.Message = string(out)
+
+	logBytes, err := ioutil.ReadFile(compileLogPath)
+	if err != nil {
+		return nil, err
+	}
+	logs := string(logBytes)
+
+	result.Message = logs
+
+	if !strings.Contains(logs, "To deploy this program:") {
 		result.CompileError = true
 	}
 
@@ -196,7 +209,7 @@ func persistEntity(rootDir string, currentPath string, files []fs.FileInfo, pers
 	for _, file := range files {
 		fileRelativePath := currentPath + "/" + file.Name()
 
-		if file.Name() == "target" {
+		if file.Name() == "target" || file.Name() == "output.log" {
 			continue
 		}
 

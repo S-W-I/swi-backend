@@ -49,6 +49,24 @@ func (r *Router) Route(ctx *fasthttp.RequestCtx) {
 	// var err error
 	// _ = err
 	switch string(ctx.Path()) {
+	case "/session/code/download/alt":
+		if string(ctx.Request.Header.Method()) != "GET" {
+			handleError(&ctx.Response, errors.UnsupportedMethodError)
+			return
+		}
+		sessionId := ctx.Request.URI().QueryArgs().Peek("session")
+
+		binaryBytes, err := r.sessionManager.DownloadSolanaCompiledProject(string(sessionId))
+		if err != nil {
+			handleError(&ctx.Response, err)
+			return
+		}
+
+		ctx.Response.SetBody(binaryBytes)
+		ctx.Response.Header.Set("Content-Type", "application/octet-stream")
+		ctx.Response.Header.Set("Content-Disposition", "attachment; filename=\"helloworld.so\"")
+		ctx.Response.SetStatusCode(fasthttp.StatusOK)
+		return
 	case "/session/code/download":
 		if string(ctx.Request.Header.Method()) != "POST" {
 			handleError(&ctx.Response, errors.UnsupportedMethodError)
@@ -71,6 +89,7 @@ func (r *Router) Route(ctx *fasthttp.RequestCtx) {
 		ctx.Response.Header.Set("Content-Type", "application/octet-stream")
 		ctx.Response.Header.Set("Content-Disposition", "attachment; filename=\"helloworld.so\"")
 		ctx.Response.SetStatusCode(fasthttp.StatusOK)
+		return
 	case "/session/code/compile":
 		if string(ctx.Request.Header.Method()) != "POST" {
 			handleError(&ctx.Response, errors.UnsupportedMethodError)
@@ -91,6 +110,7 @@ func (r *Router) Route(ctx *fasthttp.RequestCtx) {
 
 		ctx.Response.SetBody(SuccessfulResponseFrom(session).Bytes())
 		ctx.Response.SetStatusCode(fasthttp.StatusOK)
+		return
 	case "/session/code/update":
 		if string(ctx.Request.Header.Method()) != "POST" {
 			handleError(&ctx.Response, errors.UnsupportedMethodError)
@@ -111,6 +131,7 @@ func (r *Router) Route(ctx *fasthttp.RequestCtx) {
 
 		ctx.Response.SetBody(SuccessfulResponseFrom(session).Bytes())
 		ctx.Response.SetStatusCode(fasthttp.StatusOK)
+		return
 	case "/session/code/tree":
 		if string(ctx.Request.Header.Method()) != "POST" {
 			handleError(&ctx.Response, errors.UnsupportedMethodError)
@@ -131,6 +152,7 @@ func (r *Router) Route(ctx *fasthttp.RequestCtx) {
 
 		ctx.Response.SetBody(SuccessfulResponseFrom(session).Bytes())
 		ctx.Response.SetStatusCode(fasthttp.StatusOK)
+		return
 	case "/session/code/legacy/tree":
 		if string(ctx.Request.Header.Method()) != "POST" {
 			handleError(&ctx.Response, errors.UnsupportedMethodError)
@@ -151,6 +173,7 @@ func (r *Router) Route(ctx *fasthttp.RequestCtx) {
 
 		ctx.Response.SetBody(SuccessfulResponseFrom(session).Bytes())
 		ctx.Response.SetStatusCode(fasthttp.StatusOK)
+		return
 	case "/session/info":
 		if string(ctx.Request.Header.Method()) != "POST" {
 			handleError(&ctx.Response, errors.UnsupportedMethodError)
@@ -171,6 +194,7 @@ func (r *Router) Route(ctx *fasthttp.RequestCtx) {
 
 		ctx.Response.SetBody(SuccessfulResponseFrom(session).Bytes())
 		ctx.Response.SetStatusCode(fasthttp.StatusOK)
+		return
 	case "/session/new":
 		if string(ctx.Request.Header.Method()) != "POST" {
 			handleError(&ctx.Response, errors.UnsupportedMethodError)
@@ -184,11 +208,9 @@ func (r *Router) Route(ctx *fasthttp.RequestCtx) {
 
 		ctx.Response.SetBody(SuccessfulResponseFrom(newSession).Bytes())
 		ctx.Response.SetStatusCode(fasthttp.StatusOK)
-	// default:
-	// 	ctx.Error("Unsupported path", fasthttp.StatusNotFound)
+		return
 	}
-	
-	// fmt.Fprint(ctx, string(resp))
+
 }
 
 func NewRouter(workDir, templatePath string) (*Router, error) {

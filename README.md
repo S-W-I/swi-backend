@@ -4,7 +4,7 @@
 
 ### Introduction  
 
-SWI is a browser integrated development ecosystem for the Solana blockchain allowing for editing and deployment of smart contracts.
+SWI is a browser integrated development environment for the Solana blockchain allowing for editing and compiling of smart contracts.
 
 ### Tutorial
 

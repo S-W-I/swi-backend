@@ -296,8 +296,8 @@ func (manager *SessionManager) createFSSession(sessionId string) error {
 		return err
 	}
 
-	cmd := exec.Command("cp", "-r", manager.templatePath + "/", destinationDir)
-	fmt.Printf("in: %v; out: %v \n", manager.templatePath + "/", destinationDir)
+	cmd := exec.Command("/bin/bash", "wrapped-copy.sh", manager.templatePath, destinationDir)
+	// cmd := exec.Command("cp", "-r", manager.templatePath, destinationDir)
 
 	output, err := cmd.Output()
 	if err != nil {
